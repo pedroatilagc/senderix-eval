@@ -1,0 +1,6 @@
+.env
+venv/
+.venv/
+__pycache__/
+resultados_simulados/
+relatorios/

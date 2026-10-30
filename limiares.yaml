@@ -1,0 +1,10 @@
+queda_aviso_pp: 5.0
+queda_critico_pp: 10.0
+queda_nota_resumo_aviso: 0.3
+categorias_criticas:
+  - opt_out
+drift:
+  janela: 5
+  min_execucoes: 6
+  queda_taxa_pp: 5.0
+  queda_nota_resumo: 0.3

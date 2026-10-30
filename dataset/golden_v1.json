@@ -1,0 +1,255 @@
+{
+  "versao": "v1",
+  "criado_em": "27/10/2026",
+  "descricao": "primeira versão do gabarito do classificador de respostas de campanha",
+  "casos": [
+    {
+      "id": "caso-001",
+      "mensagem": "quanto custa o plano de 3 meses?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta o preço do plano de 3 meses",
+      "dificuldade": "media",
+      "notas": "pergunta de preço: sobreposição entre duvida e interessado. origem da regra de desempate da v2"
+    },
+    {
+      "id": "caso-002",
+      "mensagem": "tenho interesse sim, pode me ligar amanhã",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "demonstra interesse e pede uma ligação para amanhã",
+      "dificuldade": "facil",
+      "notas": "interesse explícito"
+    },
+    {
+      "id": "caso-003",
+      "mensagem": "vcs atendem no sabado?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se há atendimento aos sábados",
+      "dificuldade": "facil",
+      "notas": "dúvida operacional sobre dias de atendimento, sem pedido de horário livre. decisão: horário de funcionamento é duvida, horário livre para agendar é interessado (ver caso-019)"
+    },
+    {
+      "id": "caso-004",
+      "mensagem": "para de me mandar isso, que saco",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "pede para parar de receber mensagens",
+      "dificuldade": "media",
+      "notas": "reclamação + pedido de saída. testa a regra de desempate: opt_out vence reclamacao"
+    },
+    {
+      "id": "caso-005",
+      "mensagem": "sair",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "pede para sair da lista",
+      "dificuldade": "facil",
+      "notas": "mensagem de uma palavra, padrão comum de descadastro"
+    },
+    {
+      "id": "caso-006",
+      "mensagem": "comprei semana passada e até agora nada chegou",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama que a compra da semana passada não chegou",
+      "dificuldade": "facil",
+      "notas": "insatisfação sem pedido de saída"
+    },
+    {
+      "id": "caso-007",
+      "mensagem": "nossa que promoção incrível, igual a do mês passado que nunca funcionou né",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "ironiza a promoção, dizendo que a anterior não funcionou",
+      "dificuldade": "dificil",
+      "notas": "sarcasmo: o texto parece positivo, mas é uma reclamação. modelos costumam errar como interessado"
+    },
+    {
+      "id": "caso-008",
+      "mensagem": "o pix que eu fiz ontem não caiu ainda",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "informa que o pix feito ontem ainda não foi confirmado",
+      "dificuldade": "dificil",
+      "notas": "fala de pagamento mas não é intenção de compra. armadilha para a regra de preço/pagamento da v2"
+    },
+    {
+      "id": "caso-009",
+      "mensagem": "oi tudo bem?",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "cumprimento sem relação com a campanha",
+      "dificuldade": "media",
+      "notas": "cumprimento solto. pode ser o início de uma conversa, mas sozinho não tem intenção"
+    },
+    {
+      "id": "caso-010",
+      "mensagem": "👍",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "envia apenas um emoji de joinha",
+      "dificuldade": "dificil",
+      "notas": "só emoji. ambíguo: pode ser confirmação de interesse. decisão: sem texto, tratar como fora_de_contexto"
+    },
+    {
+      "id": "caso-011",
+      "mensagem": "não obrigado",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "responde de forma direta que não tem interesse na oferta, por mais que com educação",
+      "dificuldade": "media",
+      "notas": "pode parecer com um fora_de_contexto por nao apresentar pontuação. mas está mostrando desinteresse"
+    },
+    {
+      "id": "caso-012",
+      "mensagem": "de novo?",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "questiona o envio repetido da campanha para o destinatario",
+      "dificuldade": "dificil",
+      "notas": "registrar a decisão e o motivo, não só a ambiguidade"
+    },
+    {
+      "id": "caso-013",
+      "mensagem": "[Sticker]",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "envia apenas uma figurinha sem qualquer texto ou contexto legível",
+      "dificuldade": "facil",
+      "notas": "mídia pura simulada por tag. sem texto associado, classificar diretamente como fora_de_contexto"
+    },
+    {
+      "id": "caso-014",
+      "mensagem": "[Sticker Animado]",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "envia uma figurinha animada",
+      "dificuldade": "facil",
+      "notas": "variação de mídia para garantir que o modelo ignore variações da tag de sticker sem texto"
+    },
+    {
+      "id": "caso-015",
+      "mensagem": "onde fica?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta a localização",
+      "dificuldade": "facil",
+      "notas": "dúvida padrão de localidade, sem intenção de compra"
+    },
+    {
+      "id": "caso-016",
+      "mensagem": "esse ap ainda ta disponivel? queria visitar essa semana",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se o apartamento está disponível e quer visitar nesta semana",
+      "dificuldade": "facil",
+      "notas": "imobiliária - pedido de visita é intenção clara"
+    },
+    {
+      "id": "caso-017",
+      "mensagem": "aceita financiamento?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se o imóvel aceita financiamento",
+      "dificuldade": "media",
+      "notas": "imobiliária - pergunta sobre forma de pagamento, regra de desempate da v2 manda para interessado"
+    },
+    {
+      "id": "caso-018",
+      "mensagem": "o imovel aceita pet?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se o imóvel aceita animais de estimação",
+      "dificuldade": "media",
+      "notas": "imobiliária - pergunta sobre característica do imóvel, sem falar de preço, compra ou visita"
+    },
+    {
+      "id": "caso-019",
+      "mensagem": "tem horario pra quinta de tarde?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se há horário disponível na quinta à tarde",
+      "dificuldade": "facil",
+      "notas": "procurar horário é intenção de agendar"
+    },
+    {
+      "id": "caso-020",
+      "mensagem": "atende unimed?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se a clínica atende pelo convênio unimed",
+      "dificuldade": "dificil",
+      "notas": "clínica - convênio funciona como forma de pagamento. testa se o modelo generaliza a regra da v2 além da palavra preço"
+    },
+    {
+      "id": "caso-021",
+      "mensagem": "ja fiz em outro lugar, pode tirar meu numero",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "informa que já fez o procedimento em outro lugar e pede para ser removido",
+      "dificuldade": "facil",
+      "notas": "pedido explícito de remoção com justificativa"
+    },
+    {
+      "id": "caso-022",
+      "mensagem": "o curso tem certificado?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se o curso emite certificado",
+      "dificuldade": "facil",
+      "notas": "=dúvida sobre o produto sem sinal de compra"
+    },
+    {
+      "id": "caso-023",
+      "mensagem": "manda o link q eu quero entrar",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pede o link para comprar ou entrar no produto",
+      "dificuldade": "facil",
+      "notas": "pedido de link de compra é intenção explícita"
+    },
+    {
+      "id": "caso-024",
+      "mensagem": "comprei o curso e nao consigo acessar a area de membros",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "relata que comprou o curso mas não consegue acessar a área de membros",
+      "dificuldade": "media",
+      "notas": "infoproduto. já é cliente com problema, não é dúvida pré-compra"
+    },
+    {
+      "id": "caso-025",
+      "mensagem": "da pra encaixar um corte hoje ainda?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se é possível agendar um corte ainda hoje",
+      "dificuldade": "facil",
+      "notas": "salão/barbearia - pedido de encaixe é intenção de agendar"
+    },
+    {
+      "id": "caso-026",
+      "mensagem": "vcs fazem progressiva?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se o salão faz progressiva",
+      "dificuldade": "media",
+      "notas": "salão/barbearia- pergunta sobre serviço oferecido. pode indicar interesse, mas sem pedido de horário ou preço"
+    },
+    {
+      "id": "caso-027",
+      "mensagem": "MARQUEI ONTEM E NINGUEM ME ATENDEU",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama que tinha horário marcado ontem e não foi atendido",
+      "dificuldade": "facil",
+      "notas": "capslock indicando irritação. testa variação de escrita"
+    },
+    {
+      "id": "caso-028",
+      "mensagem": "consigo parcelar em 3x?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se é possível parcelar o valor em 3 vezes",
+      "dificuldade": "media",
+      "notas": "em campanha de cobrança, querer negociar o pagamento é o equivalente a interesse"
+    },
+    {
+      "id": "caso-029",
+      "mensagem": "ja paguei esse boleto semana passada",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "informa que o boleto já foi pago na semana passada",
+      "dificuldade": "dificil",
+      "notas": "contestação da cobrança. decisão: tratar como reclamacao porque exige verificação humana"
+    },
+    {
+      "id": "caso-030",
+      "mensagem": "acho que vc mandou pro numero errado, nao conheço essa empresa",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "diz que recebeu a mensagem por engano e não conhece a empresa",
+      "dificuldade": "dificil",
+      "notas": "engano de número, conforme a definição do prompt. poderia ser opt_out, decisão: fora_de_contexto"
+    },
+    {
+      "id": "caso-031",
+      "mensagem": "kkkkkkk",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "ironiza ou debocha da mensagem de campanha dando risada",
+      "dificuldade": "media",
+      "notas": "não tem relação com a campanha"
+    }
+  ]
+}

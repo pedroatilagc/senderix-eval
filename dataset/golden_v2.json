@@ -1,0 +1,247 @@
+{
+  "versao": "v2",
+  "criado_em": "29/10/2026",
+  "descricao": "segunda versão do gabarito, com casos inéditos (holdout) para testar a generalização do prompt",
+  "casos": [
+    {
+      "id": "caso-001",
+      "mensagem": "tem estacionamento ai?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se o local do estabelecimento possui estacionamento",
+      "dificuldade": "media",
+      "notas": "questionamento válido para quem pretende visitar o local do estabelecimento futuramente"
+    },
+    {
+      "id": "caso-002",
+      "mensagem": "essa promoçao é valida até quando?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta até quando a promoção é válida",
+      "dificuldade": "media",
+      "notas": "condições da oferta (validade, prazo) indicam interesse. lacuna da v5: regra não cobre condições da oferta"
+    },
+    {
+      "id": "caso-003",
+      "mensagem": "Bom dia",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "apenas uma saudação",
+      "dificuldade": "facil",
+      "notas": "geralmente vem acompanhada de outra mensagem, mas a saudaçao isolada (oi, bom dia, boa tarde, ...) é fora de contexto"
+    },
+    {
+      "id": "caso-004",
+      "mensagem": "vou bloquear voces se contiuarem mandando mensagem",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "ameaça bloquear se continuarem mandando mensagens",
+      "dificuldade": "facil",
+      "notas": "cliente ameaça bloquear caso nao pare de mandar mensagem, padrao de opt_out"
+    },
+    {
+      "id": "caso-005",
+      "mensagem": "nunca mais compro com voces, primeira e ultima vez",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "diz que nunca mais compra com a empresa",
+      "dificuldade": "dificil",
+      "notas": "insatisfação forte com a compra, sem pedido para parar as mensagens. ambíguo: modelos às vezes leem como opt_out"
+    },
+    {
+      "id": "caso-006",
+      "mensagem": "parcelamento sem juros é ate quantas vezes?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta sobre formas de pagamento",
+      "dificuldade": "facil",
+      "notas": "questionamento sobre parcelas"
+    },
+    {
+      "id": "caso-007",
+      "mensagem": "consigo marcar com você amanhã 17h?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se consegue marcar amanhã às 17h",
+      "dificuldade": "facil",
+      "notas": "procurar horario é intençao de agendar"
+    },
+    {
+      "id": "caso-008",
+      "mensagem": "como você pegou meu numero?",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "pergunta como a empresa conseguiu o número dele",
+      "dificuldade": "dificil",
+      "notas": "questiona a origem do contato. decisão de negócio: tratar como opt_out, porque indica que não autorizou o contato e há risco de denúncia do número"
+    },
+    {
+      "id": "caso-009",
+      "mensagem": "ja é a terceira vez que voces me mandam mensagem, vou denunciar",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "reclama de receber a mensagem pela terceira vez e ameaça denunciar",
+      "dificuldade": "facil",
+      "notas": "reclama do spam de mensagens, claramente nao quer mais receber mensagens desse numero"
+    },
+    {
+      "id": "caso-010",
+      "mensagem": "que demora pra ter um atendimento humano hein, mais de uma hora esperando para uma informaçao tao simples",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "o cliente reclama sobre a demora de resposta humana para informação",
+      "dificuldade": "facil",
+      "notas": "insatisfação com o atendimento"
+    },
+    {
+      "id": "caso-011",
+      "mensagem": "dá pra reservar duas unidades pra retirar hoje?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se é possível reservar duas unidades para retirada no mesmo dia",
+      "dificuldade": "media",
+      "notas": "reserva e disponibilidade para retirada indicam intenção de compra"
+    },
+    {
+      "id": "caso-012",
+      "mensagem": "se eu fechar agora, consegue melhorar o valor à vista?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "tenta negociar desconto para pagamento à vista",
+      "dificuldade": "media",
+      "notas": "negociação de pagamento é sinal claro de intenção"
+    },
+    {
+      "id": "caso-013",
+      "mensagem": "a garantia desse modelo cobre troca de peça?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se a garantia do modelo cobre troca de peça",
+      "dificuldade": "media",
+      "notas": "característica do produto sem menção a compra, pagamento ou agendamento"
+    },
+    {
+      "id": "caso-014",
+      "mensagem": "qual a diferença entre o atendimento presencial e o online?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta a diferença entre atendimento presencial e online",
+      "dificuldade": "media",
+      "notas": "pergunta sobre característica do serviço, sem intenção explícita"
+    },
+    {
+      "id": "caso-015",
+      "mensagem": "não quero esse tipo de oferta, parem de enviar",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "recusa a oferta e pede para pararem de enviar mensagens",
+      "dificuldade": "facil",
+      "notas": "recusa direta da oferta com pedido explícito de interrupção dos envios"
+    },
+    {
+      "id": "caso-016",
+      "mensagem": "recebo isso todo dia, quero que meu número saia dessa divulgação",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "reclama da frequência diária e pede para sair da divulgação",
+      "dificuldade": "media",
+      "notas": "irritação com repetição somada ao pedido para sair da lista"
+    },
+    {
+      "id": "caso-017",
+      "mensagem": "o boleto veio com valor diferente do combinado",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama que o boleto veio com valor diferente do combinado",
+      "dificuldade": "media",
+      "notas": "problema com pagamento já ocorrido; não é pedido para sair"
+    },
+    {
+      "id": "caso-018",
+      "mensagem": "a instalação foi feita ontem e ficou funcionando pela metade",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama que a instalação ficou incompleta",
+      "dificuldade": "media",
+      "notas": "insatisfação com serviço já realizado"
+    },
+    {
+      "id": "caso-019",
+      "mensagem": "você viu o jogo ontem?",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "puxa assunto sobre um jogo, sem relação com a campanha",
+      "dificuldade": "media",
+      "notas": "assunto completamente alheio à campanha"
+    },
+    {
+      "id": "caso-020",
+      "mensagem": "consegue encaixar uma avaliação ainda esta semana?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "pergunta se é possível agendar uma avaliação nesta semana",
+      "dificuldade": "media",
+      "notas": "pedido de encaixe para avaliação indica intenção de agendar"
+    },
+    {
+      "id": "caso-021",
+      "mensagem": "posso pagar metade agora e o restante na entrega?",
+      "categoria_esperada": "interessado",
+      "resumo_ideal": "propõe pagar metade agora e o restante na entrega",
+      "dificuldade": "media",
+      "notas": "negociação de forma de pagamento é sinal claro de intenção"
+    },
+    {
+      "id": "caso-022",
+      "mensagem": "o tecido desse modelo encolhe na primeira lavagem?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta se o tecido do modelo encolhe na primeira lavagem",
+      "dificuldade": "media",
+      "notas": "pergunta sobre característica do produto, sem menção a compra, pagamento ou agendamento"
+    },
+    {
+      "id": "caso-023",
+      "mensagem": "qual é o tempo médio de duração da consulta?",
+      "categoria_esperada": "duvida",
+      "resumo_ideal": "pergunta a duração média da consulta",
+      "dificuldade": "facil",
+      "notas": "pergunta sobre característica do serviço, sem intenção explícita de agendar"
+    },
+    {
+      "id": "caso-024",
+      "mensagem": "não autorizei esse contato, removam meu número da base",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "diz que não autorizou o contato e pede remoção do número da base",
+      "dificuldade": "facil",
+      "notas": "pedido explícito para sair da lista de contatos"
+    },
+    {
+      "id": "caso-025",
+      "mensagem": "parem de insistir, já disse que não quero receber ofertas",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "pede para pararem de insistir e recusa receber ofertas",
+      "dificuldade": "facil",
+      "notas": "recusa direta da oferta com irritação pela insistência"
+    },
+    {
+      "id": "caso-026",
+      "mensagem": "o pedido chegou ontem com um item faltando",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama que o pedido chegou com um item faltando",
+      "dificuldade": "facil",
+      "notas": "problema com compra já realizada"
+    },
+    {
+      "id": "caso-027",
+      "mensagem": "fui cobrado duas vezes no cartão e até agora não estornaram",
+      "categoria_esperada": "reclamacao",
+      "resumo_ideal": "reclama de cobrança duplicada no cartão sem estorno",
+      "dificuldade": "media",
+      "notas": "problema com pagamento já ocorrido, mesmo mencionando cobrança"
+    },
+    {
+      "id": "caso-028",
+      "mensagem": "você vai almoçar com a gente hoje?",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "convida para almoçar, sem relação com a campanha",
+      "dificuldade": "facil",
+      "notas": "assunto pessoal sem relação com a mensagem recebida"
+    },
+    {
+      "id": "caso-029",
+      "mensagem": "me manda a foto do cachorro de novo?",
+      "categoria_esperada": "fora_de_contexto",
+      "resumo_ideal": "pede uma foto do cachorro, sem relação com a campanha",
+      "dificuldade": "facil",
+      "notas": "pedido pessoal sem relação com produto, serviço ou campanha"
+    },
+    {
+      "id": "caso-030",
+      "mensagem": "ja disse que eu não sou [nome]",
+      "categoria_esperada": "opt_out",
+      "resumo_ideal": "reafirma que não é a pessoa procurada pela campanha",
+      "dificuldade": "dificil",
+      "notas": "contato errado que já avisou antes. a repetição gera irritação e risco de denúncia: tratar como opt_out, diferente do engano de primeira vez (golden v1 caso-030), que é fora_de_contexto"
+    }
+  ]
+}

@@ -1,0 +1,879 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relatório de regressão · {{ nova.modelo }} · {{ nova.prompt_versao }}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #090A0B;
+  --surface: #111113;
+  --surface-hover: #18191B;
+  --surface-elevated: #1A1A1D;
+  --border: #1F1F22;
+  --border-strong: #2A2A2E;
+
+  --text: #EDEDED;
+  --text-body: #D4D4D4;
+  --text-muted: #9CA3AF;
+  --text-faint: #6B7280;
+
+  --accent: #FF6347;
+  --accent-hover: #FF7A62;
+  --accent-subtle: rgba(255, 99, 71, 0.12);
+  --accent-border: rgba(255, 99, 71, 0.35);
+
+  --ok: #22C55E;
+  --aviso: #FBBF24;
+  --critico: #F43F5E;
+
+  --serie-base: #4B5563;
+  --serie-nova: var(--accent);
+  --grid: #1C1C1F;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.2, 0, 0, 1);
+  --t-micro: 100ms;
+  --t-base: 180ms;
+  --t-enter: 280ms;
+
+  --radius: 10px;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-body);
+  font: 400 14px/1.5 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+.num, .mono, td, .kpi-num, .chart-y, .chart-x, .tt { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+a { color: var(--accent); }
+
+.page { max-width: 1280px; margin: 0 auto; padding: 48px 32px 32px; }
+.stack > * + * { margin-top: 16px; }
+
+.overline {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--text-faint); margin: 0;
+}
+h1 { font-size: 24px; font-weight: 600; letter-spacing: -0.3px; color: var(--text); margin: 4px 0 0; }
+h2 { font-size: 14px; font-weight: 600; color: var(--text); margin: 0; }
+.subtle { color: var(--text-muted); }
+.faint { color: var(--text-faint); }
+
+.header { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
+.header .subtitle { margin: 8px 0 0; color: var(--text-muted); font-size: 13px; }
+.header .subtitle .mono { color: var(--text-body); font-size: 12.5px; }
+.header-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.chip {
+  display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px;
+  border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+  font: 400 12px var(--font-mono); color: var(--text-muted);
+}
+.chip svg { color: var(--text-faint); }
+.chip strong { color: var(--text-body); font-weight: 400; }
+
+.verdict {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px;
+  border-radius: 8px; font-size: 12px; font-weight: 600; letter-spacing: 0.6px;
+  border: 1px solid;
+}
+.verdict--ok { color: var(--ok); background: rgba(34, 197, 94, 0.10); border-color: rgba(34, 197, 94, 0.30); }
+.verdict--aviso { color: var(--aviso); background: rgba(251, 191, 36, 0.10); border-color: rgba(251, 191, 36, 0.30); }
+.verdict--critico { color: var(--critico); background: rgba(244, 63, 94, 0.10); border-color: rgba(244, 63, 94, 0.32); }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;
+  transition: border-color var(--t-base) var(--ease), background-color var(--t-base) var(--ease);
+  min-width: 0;
+}
+.card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.card-head p { margin: 4px 0 0; font-size: 13px; color: var(--text-faint); }
+.count {
+  font: 500 11px var(--font-mono); color: var(--text-muted); padding: 2px 8px;
+  border: 1px solid var(--border-strong); border-radius: 999px; margin-left: 8px; vertical-align: 1px;
+}
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.kpi { padding: 20px 24px; display: flex; flex-direction: column; gap: 12px; }
+.kpi-value { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.kpi-num { font: 700 36px/1 var(--font-display); letter-spacing: -1px; color: var(--text); font-feature-settings: "tnum"; }
+.kpi-affix { font: 600 16px var(--font-display); color: var(--text-faint); letter-spacing: 0; }
+.kpi-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; flex-wrap: wrap; }
+.delta { font: 500 12px var(--font-mono); white-space: nowrap; }
+.delta--bom { color: var(--ok); }
+.delta--ruim { color: var(--critico); }
+.delta--neutro { color: var(--text-muted); }
+.kpi-detail { font: 400 11.5px var(--font-mono); color: var(--text-faint); }
+
+.verdict-card { display: grid; grid-template-columns: 220px 1fr; gap: 24px; align-items: start; }
+.verdict-status { display: flex; flex-direction: column; gap: 12px; }
+.verdict-status .lead { font-size: 13px; color: var(--text-muted); margin: 0; }
+.reasons { list-style: none; margin: 0; padding: 0; border: 1px solid var(--border); border-radius: 8px; }
+.reasons li { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; font-size: 13px; color: var(--text-body); }
+.reasons li + li { border-top: 1px solid var(--border); }
+.reasons .lvl { font: 500 10.5px var(--font-mono); letter-spacing: 0.6px; text-transform: uppercase; min-width: 64px; display: inline-flex; gap: 6px; align-items: center; padding-top: 1px; }
+.lvl--aviso { color: var(--aviso); }
+.lvl--critico { color: var(--critico); }
+.lvl--ok { color: var(--ok); }
+
+.empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  gap: 8px; padding: 32px 16px; border: 1px dashed var(--border-strong); border-radius: 8px; min-height: 160px;
+}
+.empty-icon {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border-strong);
+  display: grid; place-items: center; color: var(--text-muted); margin-bottom: 4px; background: var(--surface);
+}
+.empty-icon--ok { color: var(--ok); border-color: rgba(34, 197, 94, 0.30); background: rgba(34, 197, 94, 0.08); }
+.empty strong { color: var(--text); font-weight: 500; font-size: 13.5px; }
+.empty span { color: var(--text-faint); font-size: 12.5px; max-width: 360px; }
+
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-muted); }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.view .legend { margin-bottom: 16px; }
+
+.seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg); }
+.seg-btn {
+  display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border: 0; border-radius: 6px;
+  background: transparent; color: var(--text-muted); font: 500 12.5px var(--font-sans); cursor: pointer;
+  transition: background-color var(--t-micro) var(--ease), color var(--t-micro) var(--ease);
+}
+.seg-btn:hover { color: var(--text); }
+.seg-btn[aria-selected="true"] { background: var(--surface-elevated); color: var(--accent); box-shadow: inset 0 0 0 1px var(--border-strong); }
+.seg-btn .logo { margin-left: -2px; }
+.sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex: none; }
+.sw--base { background: var(--serie-base); }
+.sw--nova { background: var(--serie-nova); }
+.sw--neutra { background: var(--text-faint); }
+.sw--saida { background: var(--text-faint); opacity: 0.45; }
+
+.logo {
+  display: inline-grid; place-items: center; flex: none; width: 24px; height: 24px; border-radius: 6px;
+  color: #FFFFFF;
+}
+.logo svg { width: 22px; height: 22px; display: block; shape-rendering: geometricPrecision; }
+.logo--anthropic { background: #D4A27F; color: #191919; }
+.logo--anthropic svg { width: 15px; height: 15px; }
+.logo--generico { border: 1px solid var(--border-strong); color: var(--text-muted); }
+.logo--generico svg { width: 14px; height: 14px; }
+.logo--sm { width: 18px; height: 18px; border-radius: 5px; }
+.logo--sm svg { width: 17px; height: 17px; }
+.logo--sm.logo--anthropic svg { width: 12px; height: 12px; }
+.logo--sm.logo--generico svg { width: 11px; height: 11px; }
+.model { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+.model-name { font: 500 13.5px var(--font-sans); color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.model-role { font-size: 12px; color: var(--text-faint); }
+.legend .model { gap: 6px; }
+.legend .model-name { font-size: 12.5px; color: var(--text-body); }
+.subtitle .logo { vertical-align: -4px; margin-right: 2px; }
+.subtitle .logo--anthropic { background: none; color: #FFFFFF; }
+.subtitle .logo--anthropic svg { width: 15px; height: 15px; }
+.sw--dash { width: 14px; height: 0; border-top: 1.5px dashed var(--text-muted); border-radius: 0; }
+
+.chart { display: grid; grid-template-columns: 44px minmax(0, 1fr); grid-template-rows: var(--h, 220px) auto; }
+.chart-y { position: relative; font: 400 11px var(--font-mono); color: var(--text-faint); }
+.chart-y span { position: absolute; right: 10px; transform: translateY(-50%); white-space: nowrap; }
+.chart-plot { position: relative; }
+.chart-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; display: block; }
+.chart-x { grid-column: 2; position: relative; height: 32px; font: 400 11px var(--font-mono); color: var(--text-faint); }
+.chart-x span { position: absolute; top: 10px; transform: translateX(-50%); white-space: nowrap; }
+.chart-x--sans span { font-family: var(--font-sans); font-size: 12px; color: var(--text-muted); }
+
+.grid-line { stroke: var(--grid); stroke-width: 1; }
+.grid-line--base { stroke: var(--border-strong); }
+.bar { transform-box: fill-box; transform-origin: 50% 100%; animation: grow-y var(--t-enter) var(--ease-in) both; animation-delay: calc(var(--d, 0ms) + var(--i, 0) * 20ms); }
+.bar--base { fill: var(--serie-base); }
+.bar--nova { fill: var(--serie-nova); }
+.hit { fill: transparent; cursor: default; transition: fill var(--t-micro) var(--ease); outline: none; }
+.hit:hover, .hit:focus-visible { fill: rgba(255, 255, 255, 0.04); }
+.ref { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 4 4; opacity: 0.8; }
+.ref-label {
+  position: absolute; right: 0; transform: translateY(-100%); padding: 0 0 3px;
+  font: 500 10.5px var(--font-mono); color: var(--text-muted); pointer-events: none;
+  animation: fade var(--t-enter) var(--ease-in) both; animation-delay: 700ms;
+}
+.ref-label b { font-weight: 500; color: var(--text); background: var(--surface); padding: 1px 4px; border-radius: 3px; border: 1px solid var(--border); }
+.card:hover .ref-label b { background: var(--surface-hover); }
+
+.trend { display: flex; flex-direction: column; }
+.trend-title { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin: 0 0 8px 44px; }
+.trend-title:not(:first-child) { margin-top: 16px; }
+.chart-x--edges span:first-child { transform: translateX(-25%); }
+.chart-x--edges span:last-child { transform: translateX(-75%); }
+.trend-title .num { font-family: var(--font-mono); color: var(--text); }
+.trend-line { fill: none; stroke: var(--serie-nova); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.line-reveal { animation: reveal 700ms var(--ease) both; animation-delay: var(--d, 0ms); }
+.pt { stroke: var(--serie-nova); stroke-width: 8; stroke-linecap: round; fill: none; animation: fade var(--t-base) var(--ease) both; animation-delay: calc(var(--d, 0ms) + 600ms + var(--i, 0) * 30ms); }
+.pt-ring { stroke: var(--surface); stroke-width: 16; stroke-linecap: round; fill: none; }
+.pt--atual { stroke-width: 12; }
+.pt-halo { stroke: color-mix(in srgb, var(--serie-nova) 22%, transparent); stroke-width: 26; stroke-linecap: round; fill: none; animation: fade var(--t-enter) var(--ease) both; animation-delay: calc(var(--d, 0ms) + 900ms); }
+.trend-empty { position: absolute; inset: 0; display: grid; place-items: center; font-size: 12px; color: var(--text-faint); }
+
+.tokens { display: flex; flex-direction: column; gap: 20px; padding-top: 4px; }
+.tok-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; align-items: center; }
+.tok-label { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--text-muted); min-width: 0; }
+.tok-label .mono { color: var(--text-body); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tok-bar { position: relative; height: 28px; }
+.tok-bar svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.tok-anim { transform-origin: 0 50%; animation: grow-x 600ms var(--ease-in) both; animation-delay: var(--d, 0ms); }
+.tok { stroke: var(--surface); stroke-width: 2; }
+.card:hover .tok { stroke: var(--surface-hover); }
+.tok--base { fill: var(--serie-base); }
+.tok--nova { fill: var(--serie-nova); }
+.tok--saida { fill-opacity: 0.45; }
+.tok-total { font: 500 15px var(--font-mono); color: var(--text); text-align: right; min-width: 72px; }
+.tok-split { grid-column: 1 / -1; font: 400 11.5px var(--font-mono); color: var(--text-faint); display: flex; gap: 16px; }
+.tok-axis { display: flex; justify-content: space-between; font: 400 11px var(--font-mono); color: var(--text-faint); border-top: 1px solid var(--border); padding-top: 8px; }
+
+.table-wrap { overflow: auto; max-height: 560px; border: 1px solid var(--border); border-radius: 8px; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+th {
+  position: sticky; top: 0; z-index: 1; background: var(--surface); text-align: left;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-faint);
+  padding: 10px 16px; border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.card:hover th { background: var(--surface-hover); }
+td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--text-body); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr { transition: background-color var(--t-micro) var(--ease); }
+tbody tr:hover td { background: rgba(255, 255, 255, 0.025); }
+td.id { font: 400 12.5px var(--font-mono); color: var(--text-muted); white-space: nowrap; }
+td.msg { min-width: 220px; max-width: 340px; color: var(--text); }
+td.msg q { quotes: "“" "”"; }
+td.sum { min-width: 200px; color: var(--text-muted); }
+td.nowrap, th.nowrap { white-space: nowrap; }
+td.right, th.right { text-align: right; }
+td.data { font: 400 13px var(--font-mono); }
+
+.cat {
+  display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px;
+  font: 400 11.5px var(--font-mono); color: var(--text-body); white-space: nowrap;
+  background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-strong);
+}
+.cat--critico { color: var(--critico); background: rgba(244, 63, 94, 0.10); border-color: rgba(244, 63, 94, 0.32); }
+.cat--ok { color: var(--ok); background: rgba(34, 197, 94, 0.10); border-color: rgba(34, 197, 94, 0.30); }
+.cat--nulo { color: var(--text-faint); border-style: dashed; background: transparent; }
+.cat--muted { color: var(--text-muted); }
+.shift { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.shift svg { color: var(--text-faint); flex: none; }
+
+.res { display: inline-flex; align-items: center; gap: 6px; font: 500 12px var(--font-mono); white-space: nowrap; }
+.res--ok { color: var(--ok); }
+.res--erro { color: var(--critico); }
+.nota { font-family: var(--font-mono); color: var(--text); }
+.nota small { color: var(--text-faint); font-size: 11px; }
+
+details.card { padding: 0; }
+details.card > summary {
+  list-style: none; cursor: pointer; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-radius: var(--radius);
+}
+details.card > summary::-webkit-details-marker { display: none; }
+details.card > summary p { margin: 4px 0 0; font-size: 13px; color: var(--text-faint); }
+details.card > summary .chev { color: var(--text-muted); transition: transform var(--t-base) var(--ease); flex: none; }
+details.card[open] > summary .chev { transform: rotate(180deg); }
+details.card .details-body { padding: 0 24px 24px; }
+.row-toggle { cursor: pointer; }
+.row-toggle td:last-child svg { color: var(--text-faint); transition: transform var(--t-base) var(--ease); }
+.row-toggle[aria-expanded="true"] td:last-child svg { transform: rotate(90deg); color: var(--accent); }
+.row-toggle[aria-expanded="true"] td { background: rgba(255, 255, 255, 0.025); border-bottom-color: transparent; }
+.row-detail td { background: rgba(255, 255, 255, 0.025); padding: 4px 16px 16px 16px; }
+.row-detail dl { margin: 0; display: grid; grid-template-columns: 120px 1fr; gap: 8px 16px; font-size: 13px; padding: 12px 16px; border-left: 2px solid var(--accent-border); }
+.row-detail dt { color: var(--text-faint); font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; padding-top: 2px; }
+.row-detail dd { margin: 0; color: var(--text-body); }
+.row-detail .err { font: 400 12px var(--font-mono); color: var(--critico); white-space: pre-wrap; word-break: break-word; }
+
+.footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-faint); font-size: 12px; }
+.footer dl { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px 24px; margin: 0 0 24px; }
+.footer dt { font-size: 11px; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 4px; }
+.footer dd { margin: 0; font-family: var(--font-mono); color: var(--text-muted); font-size: 12px; line-height: 1.7; }
+.footer .gen { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+.tt {
+  position: fixed; left: 0; top: 0; z-index: 50; pointer-events: none; min-width: 180px; max-width: 280px;
+  background: var(--surface-elevated); border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 12px;
+  opacity: 0; transform: translate3d(var(--x, 0), calc(var(--y, 0) + 4px), 0);
+  transition: opacity var(--t-base) var(--ease), transform var(--t-base) var(--ease);
+}
+.tt.is-visible { opacity: 1; transform: translate3d(var(--x, 0), var(--y, 0), 0); }
+.tt-title { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+.tt-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-body); }
+.tt-row .logo { margin-left: -2px; }
+.tt-row + .tt-row { margin-top: 4px; }
+.tt-row b { margin-left: auto; padding-left: 16px; font: 500 12.5px var(--font-mono); color: var(--text); }
+
+.reveal { animation: fade var(--t-enter) var(--ease-in) both; animation-delay: calc(var(--s, 0) * 60ms); }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes grow-y { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes grow-x { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes reveal { from { clip-path: inset(-20px 100% -20px -20px); } to { clip-path: inset(-20px -20px -20px -20px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .bar, .tok-anim, .line-reveal, .pt, .pt-halo, .ref-label { animation: none; }
+  .reveal { animation: fade 120ms linear both; animation-delay: 0ms; }
+  .tt, .card, .hit, tbody tr { transition: opacity 100ms linear; }
+}
+</style>
+<style>
+:root { --serie-base: {{ modelo_base.cor }}; --serie-nova: {{ modelo_nova.cor }}; }
+
+@media (max-width: 960px) {
+  .charts { grid-template-columns: minmax(0, 1fr); }
+  .verdict-card { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .page { padding: 32px 16px 24px; }
+  .card { padding: 20px 16px; }
+  .kpis { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+  .kpi { padding: 16px; }
+  .kpi:first-child { grid-column: 1 / -1; }
+  .kpi-num { font-size: 28px; }
+  .header { align-items: flex-start; }
+  .chart { grid-template-columns: 36px minmax(0, 1fr); }
+  .trend-title { margin-left: 36px; }
+  .chart-x--sans span { font-size: 10.5px; white-space: normal; text-align: center; width: 18%; line-height: 1.2; }
+  details.card > summary { padding: 16px; }
+  details.card .details-body { padding: 0 16px 16px; }
+  .row-detail dl { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+{% macro icone(nome, tamanho=14) -%}
+<svg width="{{ tamanho }}" height="{{ tamanho }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if nome == "ok" -%}<circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>
+{%- elif nome == "aviso" -%}<path d="M10.3 4.2 2.9 17a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.7 4.2a2 2 0 0 0-3.4 0Z"/><path d="M12 9.5v4"/><path d="M12 17h.01"/>
+{%- elif nome == "critico" -%}<path d="M8 2.5h8L21.5 8v8L16 21.5H8L2.5 16V8Z"/><path d="m9.5 9.5 5 5"/><path d="m14.5 9.5-5 5"/>
+{%- elif nome == "seta" -%}<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>
+{%- elif nome == "chevron-down" -%}<path d="m6 9 6 6 6-6"/>
+{%- elif nome == "chevron-right" -%}<path d="m9 6 6 6-6 6"/>
+{%- elif nome == "relogio" -%}<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+{%- elif nome == "tendencia" -%}<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>
+{%- elif nome == "vazio" -%}<path d="M4 13h4l2 3h4l2-3h4"/><path d="M5.5 6.5 4 13v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5l-1.5-6.5A2 2 0 0 0 16.6 5H7.4a2 2 0 0 0-1.9 1.5Z"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro rotulo_status(status) -%}
+{{ {"ok": "OK", "aviso": "AVISO", "critico": "CRÍTICO"}[status] }}
+{%- endmacro %}
+
+{% macro badge_veredito(status) -%}
+<span class="verdict verdict--{{ status }}">{{ icone(status) }}{{ rotulo_status(status) }}</span>
+{%- endmacro %}
+
+{% macro badge_categoria(categoria, tom=none) -%}
+{% if categoria is none -%}
+<span class="cat cat--nulo">inválida</span>
+{%- else -%}
+<span class="cat{% if tom %} cat--{{ tom }}{% endif %}">{{ categoria }}</span>
+{%- endif %}
+{%- endmacro %}
+
+{% macro stat_card(kpi, ordem) -%}
+<article class="card kpi">
+  <p class="overline">{{ kpi.rotulo }}</p>
+  <div class="kpi-value">
+    {% if kpi.prefixo and kpi.valor is not none %}<span class="kpi-affix">{{ kpi.prefixo }}</span>{% endif %}
+    <span class="kpi-num"{% if kpi.valor is not none %} data-count="{{ kpi.valor }}" data-decimals="{{ kpi.casas }}"{% endif %}>{{ kpi.valor_fmt }}</span>
+    {% if kpi.sufixo and kpi.valor is not none %}<span class="kpi-affix">{{ kpi.sufixo }}</span>{% endif %}
+  </div>
+  <div class="kpi-foot">
+    {% if kpi.variacao %}
+    <span class="delta delta--{{ kpi.variacao.tom }}">{{ kpi.variacao.seta }} {{ kpi.variacao.texto }}</span>
+    {% else %}
+    <span class="faint">Sem dado anterior</span>
+    {% endif %}
+    <span class="kpi-detail">{{ kpi.detalhe }}</span>
+  </div>
+</article>
+{%- endmacro %}
+
+{% macro estado_vazio(titulo, descricao, nome_icone="vazio", tom=none) -%}
+<div class="empty">
+  <div class="empty-icon{% if tom %} empty-icon--{{ tom }}{% endif %}">{{ icone(nome_icone, 18) }}</div>
+  <strong>{{ titulo }}</strong>
+  <span>{{ descricao }}</span>
+</div>
+{%- endmacro %}
+
+{% macro logo(provedor, pequeno=false) -%}
+<span class="logo logo--{{ provedor.chave }}{% if pequeno %} logo--sm{% endif %}" title="{{ provedor.nome }}"><svg aria-hidden="true"><use href="#logo-{{ provedor.chave }}"/></svg></span>
+{%- endmacro %}
+
+{% macro tag_modelo(m, papel=none, pequeno=false) -%}
+<span class="model">{{ logo(m.provedor, pequeno) }}<span class="model-name">{{ m.nome }}</span>{% if papel %}<span class="model-role">{{ papel }}</span>{% endif %}</span>
+{%- endmacro %}
+
+{% macro legenda(itens) -%}
+<div class="legend">
+  {% for item in itens %}
+  {% if item.modelo is defined %}
+  <span><i class="sw sw--{{ item.classe }}"></i>{{ tag_modelo(item.modelo, item.papel, true) }}</span>
+  {% else %}
+  <span><i class="sw sw--{{ item.classe }}"></i>{{ item.rotulo }}</span>
+  {% endif %}
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro chart_card(titulo, descricao, itens_legenda, secao, abas=none, grupo=none) -%}
+<section class="card reveal" style="--s: {{ secao }}; --d: {{ secao * 60 + 120 }}ms">
+  <div class="card-head">
+    <div>
+      <h2>{{ titulo }}</h2>
+      <p>{{ descricao }}</p>
+    </div>
+    {% if abas %}
+    <div class="seg" role="tablist" aria-label="{{ titulo }}">
+      {% for aba in abas %}
+      <button type="button" role="tab" class="seg-btn" id="aba-{{ grupo }}-{{ aba.chave }}" aria-controls="{{ grupo }}-{{ aba.chave }}" aria-selected="{{ 'true' if loop.first else 'false' }}" tabindex="{{ 0 if loop.first else -1 }}">
+        {% if aba.modelo %}{{ logo(aba.modelo.provedor, true) }}{% endif %}{{ aba.rotulo }}
+      </button>
+      {% endfor %}
+    </div>
+    {% else %}
+    {{ legenda(itens_legenda) }}
+    {% endif %}
+  </div>
+  {{ caller() }}
+</section>
+{%- endmacro %}
+
+{% macro eixo_y(ticks) -%}
+<div class="chart-y" aria-hidden="true">{% for t in ticks %}<span style="top: {{ '%.2f' % t.pos }}%">{{ t.rotulo }}</span>{% endfor %}</div>
+{%- endmacro %}
+
+{% macro linhas_grade(ticks) -%}
+{% for t in ticks %}<line class="grid-line{% if loop.first %} grid-line--base{% endif %}" x1="0" x2="100" y1="{{ '%.2f' % t.pos }}" y2="{{ '%.2f' % t.pos }}" vector-effect="non-scaling-stroke"/>{% endfor %}
+{%- endmacro %}
+
+{% macro alvos_hover(alvos) -%}
+{% for a in alvos %}<rect class="hit" x="{{ '%.3f' % a.x }}" y="-2" width="{{ '%.3f' % a.largura }}" height="104" tabindex="0" data-tip='{{ a.dica.model_dump() | tojson }}'><title>{{ a.dica.titulo }}</title></rect>{% endfor %}
+{%- endmacro %}
+
+{% macro grafico_barras(g, altura=220, rotulos_sans=false) -%}
+<div class="chart" style="--h: {{ altura }}px">
+  {{ eixo_y(g.ticks_y | reverse | list) }}
+  <div class="chart-plot">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="Gráfico de barras">
+      {{ linhas_grade(g.ticks_y) }}
+      {% for b in g.barras %}<rect class="bar bar--{{ b.serie }}" x="{{ '%.3f' % b.x }}" y="{{ '%.3f' % b.y }}" width="{{ '%.3f' % b.largura }}" height="{{ '%.3f' % b.altura }}" style="--i: {{ b.indice }}"/>{% endfor %}
+      {% for r in g.linhas_ref %}<line class="ref" x1="0" x2="100" y1="{{ '%.3f' % r.y }}" y2="{{ '%.3f' % r.y }}" vector-effect="non-scaling-stroke"/>{% endfor %}
+      {{ alvos_hover(g.alvos) }}
+    </svg>
+    {% for r in g.linhas_ref %}<span class="ref-label" style="top: {{ '%.3f' % r.y }}%"><b>{{ r.rotulo }}</b></span>{% endfor %}
+  </div>
+  <div class="chart-x{% if rotulos_sans %} chart-x--sans{% endif %}" aria-hidden="true">{% for t in g.rotulos_x %}<span style="left: {{ '%.3f' % t.pos }}%">{{ t.rotulo }}</span>{% endfor %}</div>
+</div>
+{%- endmacro %}
+
+{% macro tabela_mudancas(linhas, tom) -%}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Caso</th><th>Mensagem do contato</th><th>Esperada</th><th>Antes → depois</th><th>Resumo (nova)</th></tr>
+    </thead>
+    <tbody>
+      {% for l in linhas %}
+      <tr>
+        <td class="id">{{ l.id_caso }}</td>
+        <td class="msg"><q>{{ l.mensagem }}</q></td>
+        <td>{{ badge_categoria(l.esperada) }}</td>
+        <td><span class="shift">{{ badge_categoria(l.antes, "muted") }}{{ icone("seta", 12) }}{{ badge_categoria(l.depois, tom) }}</span></td>
+        <td class="sum">{{ l.resumo if l.resumo else "—" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{%- endmacro %}
+
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="grad-gemini" x1="0%" x2="68.73%" y1="100%" y2="30.395%"><stop offset="0%" stop-color="#1C7DFF"/><stop offset="52.021%" stop-color="#1C69FF"/><stop offset="100%" stop-color="#F0DCD6"/></linearGradient>
+  </defs>
+  <symbol id="logo-openai" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M21.55 10.004a5.416 5.416 0 00-.478-4.501c-1.217-2.09-3.662-3.166-6.05-2.66A5.59 5.59 0 0010.831 1C8.39.995 6.224 2.546 5.473 4.838A5.553 5.553 0 001.76 7.496a5.487 5.487 0 00.691 6.5 5.416 5.416 0 00.477 4.502c1.217 2.09 3.662 3.165 6.05 2.66A5.586 5.586 0 0013.168 23c2.443.006 4.61-1.546 5.361-3.84a5.553 5.553 0 003.715-2.66 5.488 5.488 0 00-.693-6.497v.001zm-8.381 11.558a4.199 4.199 0 01-2.675-.954c.034-.018.093-.05.132-.074l4.44-2.53a.71.71 0 00.364-.623v-6.176l1.877 1.069c.02.01.033.029.036.05v5.115c-.003 2.274-1.87 4.118-4.174 4.123zM4.192 17.78a4.059 4.059 0 01-.498-2.763c.032.02.09.055.131.078l4.44 2.53c.225.13.504.13.73 0l5.42-3.088v2.138a.068.068 0 01-.027.057L9.9 19.288c-1.999 1.136-4.552.46-5.707-1.51h-.001zM3.023 8.216A4.15 4.15 0 015.198 6.41l-.002.151v5.06a.711.711 0 00.364.624l5.42 3.087-1.876 1.07a.067.067 0 01-.063.005l-4.489-2.559c-1.995-1.14-2.679-3.658-1.53-5.63h.001zm15.417 3.54l-5.42-3.088L14.896 7.6a.067.067 0 01.063-.006l4.489 2.557c1.998 1.14 2.683 3.662 1.529 5.633a4.163 4.163 0 01-2.174 1.807V12.38a.71.71 0 00-.363-.623zm1.867-2.773a6.04 6.04 0 00-.132-.078l-4.44-2.53a.731.731 0 00-.729 0l-5.42 3.088V7.325a.068.068 0 01.027-.057L14.1 4.713c2-1.137 4.555-.46 5.707 1.513.487.833.664 1.809.499 2.757h.001zm-11.741 3.81l-1.877-1.068a.065.065 0 01-.036-.051V6.559c.001-2.277 1.873-4.122 4.181-4.12.976 0 1.92.338 2.671.954-.034.018-.092.05-.131.073l-4.44 2.53a.71.71 0 00-.365.623l-.003 6.173v.002zm1.02-2.168L12 9.25l2.414 1.375v2.75L12 14.75l-2.415-1.375v-2.75z"/></symbol>
+  <symbol id="logo-anthropic" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M13.827 3.52h3.603L24 20h-3.603l-6.57-16.48zm-7.258 0h3.767L16.906 20h-3.674l-1.343-3.461H5.017l-1.344 3.46H0L6.57 3.522zm4.132 9.959L8.453 7.687 6.205 13.48H10.7z"/></symbol>
+  <symbol id="logo-google" viewBox="0 0 24 24"><path fill="url(#grad-gemini)" d="M12 24A14.304 14.304 0 000 12 14.304 14.304 0 0012 0a14.305 14.305 0 0012 12 14.305 14.305 0 00-12 12"/></symbol>
+  <symbol id="logo-deepseek" viewBox="0 0 24 24"><path fill="#4D6BFE" d="M23.748 4.482c-.254-.124-.364.113-.512.234-.051.039-.094.09-.137.136-.372.397-.806.657-1.373.626-.829-.046-1.537.214-2.163.848-.133-.782-.575-1.248-1.247-1.548-.352-.156-.708-.311-.955-.65-.172-.241-.219-.51-.305-.774-.055-.16-.11-.323-.293-.35-.2-.031-.278.136-.356.276-.313.572-.434 1.202-.422 1.84.027 1.436.633 2.58 1.838 3.393.137.093.172.187.129.323-.082.28-.18.552-.266.833-.055.179-.137.217-.329.14a5.526 5.526 0 01-1.736-1.18c-.857-.828-1.631-1.742-2.597-2.458a11.365 11.365 0 00-.689-.471c-.985-.957.13-1.743.388-1.836.27-.098.093-.432-.779-.428-.872.004-1.67.295-2.687.684a3.055 3.055 0 01-.465.137 9.597 9.597 0 00-2.883-.102c-1.885.21-3.39 1.102-4.497 2.623C.082 8.606-.231 10.684.152 12.85c.403 2.284 1.569 4.175 3.36 5.653 1.858 1.533 3.997 2.284 6.438 2.14 1.482-.085 3.133-.284 4.994-1.86.47.234.962.327 1.78.397.63.059 1.236-.03 1.705-.128.735-.156.684-.837.419-.961-2.155-1.004-1.682-.595-2.113-.926 1.096-1.296 2.746-2.642 3.392-7.003.05-.347.007-.565 0-.845-.004-.17.035-.237.23-.256a4.173 4.173 0 001.545-.475c1.396-.763 1.96-2.015 2.093-3.517.02-.23-.004-.467-.247-.588zM11.581 18c-2.089-1.642-3.102-2.183-3.52-2.16-.392.024-.321.471-.235.763.09.288.207.486.371.739.114.167.192.416-.113.603-.673.416-1.842-.14-1.897-.167-1.361-.802-2.5-1.86-3.301-3.307-.774-1.393-1.224-2.887-1.298-4.482-.02-.386.093-.522.477-.592a4.696 4.696 0 011.529-.039c2.132.312 3.946 1.265 5.468 2.774.868.86 1.525 1.887 2.202 2.891.72 1.066 1.494 2.082 2.48 2.914.348.292.625.514.891.677-.802.09-2.14.11-3.054-.614zm1-6.44a.306.306 0 01.415-.287.302.302 0 01.2.288.306.306 0 01-.31.307.303.303 0 01-.304-.308zm3.11 1.596c-.2.081-.399.151-.59.16a1.245 1.245 0 01-.798-.254c-.274-.23-.47-.358-.552-.758a1.73 1.73 0 01.016-.588c.07-.327-.008-.537-.239-.727-.187-.156-.426-.199-.688-.199a.559.559 0 01-.254-.078c-.11-.054-.2-.19-.114-.358.028-.054.16-.186.192-.21.356-.202.767-.136 1.146.016.352.144.618.408 1.001.782.391.451.462.576.685.914.176.265.336.537.445.848.067.195-.019.354-.25.452z"/></symbol>
+  <symbol id="logo-generico" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2.5 20.5 7v10L12 21.5 3.5 17V7Z"/><path d="M3.5 7 12 11.5 20.5 7M12 11.5v10"/></g></symbol>
+</svg>
+<main class="page">
+
+  <header class="header reveal" style="--s: 0">
+    <div>
+      <p class="overline">Senderix eval</p>
+      <h1>Relatório de regressão</h1>
+      <p class="subtitle">
+        {{ logo(modelo_nova.provedor, true) }} <span class="mono">{{ nova.modelo }}</span> · prompt <span class="mono">{{ nova.prompt_versao }}</span>
+        · dataset <span class="mono">{{ nova.dataset_versao }}</span>
+        · comparado com {{ logo(modelo_base.provedor, true) }} <span class="mono">{{ rotulo_base }}</span>
+      </p>
+    </div>
+    <div class="header-meta">
+      <span class="chip">{{ icone("relogio", 13) }}<strong>{{ data_base }}</strong> → <strong>{{ data_nova }}</strong></span>
+      {{ badge_veredito(veredito.status) }}
+    </div>
+  </header>
+
+  <div class="stack">
+
+    <section class="kpis reveal" style="--s: 1" aria-label="Indicadores da execução nova">
+      {% for kpi in kpis %}{{ stat_card(kpi, loop.index0) }}{% endfor %}
+    </section>
+
+    <section class="card verdict-card reveal" style="--s: 2">
+      <div class="verdict-status">
+        <p class="overline">Veredito</p>
+        <div>{{ badge_veredito(veredito.status) }}</div>
+        <p class="lead">
+          {% if veredito.status == "ok" %}A execução nova está dentro dos limiares definidos.
+          {% elif veredito.status == "aviso" %}Mudanças que merecem revisão antes de promover.
+          {% else %}Regressão acima do limiar crítico. Não promova esta configuração.
+          {% endif %}
+        </p>
+      </div>
+      {% if motivos %}
+      <ul class="reasons">
+        {% for m in motivos %}
+        <li><span class="lvl lvl--{{ m.nivel }}">{{ icone(m.nivel, 12) }}{{ m.nivel }}</span><span>{{ m.texto }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      {{ estado_vazio("Nenhuma regressão acima dos limiares",
+                      "Taxa de acerto, nota do resumo e categorias críticas ficaram dentro do esperado.", "ok", "ok") }}
+      {% endif %}
+    </section>
+
+    <div class="charts">
+      {% call chart_card("Acurácia por categoria", "Percentual de acerto por categoria esperada",
+                         [dict(modelo=modelo_base, classe="base", papel="base"), dict(modelo=modelo_nova, classe="nova", papel="nova")], 3) %}
+        {{ grafico_barras(grafico_categorias, 240, true) }}
+      {% endcall %}
+
+      {% call chart_card("Tendência", ("Últimas " ~ tendencia.quantidade ~ " execuções" if tendencia.quantidade > 1 else "Execuções") ~ " de " ~ nova.modelo ~ " no dataset " ~ nova.dataset_versao,
+                         [dict(modelo=modelo_nova, classe="nova")], 3) %}
+        {% if tendencia.quantidade < 2 %}
+          {{ estado_vazio("Ainda não há tendência",
+                          "A tendência aparece a partir da segunda execução deste modelo no mesmo dataset.", "tendencia") }}
+        {% else %}
+        <div class="trend">
+          {% for p in tendencia.paineis %}
+          <div class="trend-title">
+            <span>{{ p.titulo }}</span>
+          </div>
+          <div class="chart" style="--h: 96px">
+            {{ eixo_y(p.ticks_y) }}
+            <div class="chart-plot">
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">{{ linhas_grade(p.ticks_y) }}</svg>
+              {% if p.vazio %}
+              <div class="trend-empty">{{ p.vazio }}</div>
+              {% else %}
+              <svg class="line-reveal" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <polyline class="trend-line" points="{{ p.trajeto }}" vector-effect="non-scaling-stroke"/>
+              </svg>
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                {% for pt in p.pontos %}
+                {% set d = "M%.3f %.3fh0" % (pt.x, pt.y) %}
+                {% if pt.atual %}<path class="pt-halo" d="{{ d }}" vector-effect="non-scaling-stroke"/>{% endif %}
+                <path class="pt-ring" d="{{ d }}" vector-effect="non-scaling-stroke"/>
+                <path class="pt{% if pt.atual %} pt--atual{% endif %}" d="{{ d }}" style="--i: {{ loop.index0 }}" vector-effect="non-scaling-stroke"/>
+                {% endfor %}
+              </svg>
+              {% endif %}
+              <svg viewBox="0 0 100 100" preserveAspectRatio="none" role="img" aria-label="{{ p.titulo }}">{{ alvos_hover(p.alvos) }}</svg>
+            </div>
+          </div>
+          {% endfor %}
+          <div class="chart" style="--h: 0px">
+            <div></div>
+            <div class="chart-x chart-x--edges" aria-hidden="true">{% for t in tendencia.rotulos_x %}{% if loop.first or loop.last or tendencia.quantidade <= 5 %}<span style="left: {{ '%.3f' % t.pos }}%">{{ t.rotulo }}</span>{% endif %}{% endfor %}</div>
+          </div>
+        </div>
+        {% endif %}
+      {% endcall %}
+
+      {% call chart_card("Latência por caso", "Um caso por barra, mesma escala nas três visões", [], 4, abas=visoes_latencia, grupo="latencia") %}
+        {% for v in visoes_latencia %}
+        <div class="view" id="latencia-{{ v.chave }}" role="tabpanel" aria-labelledby="aba-latencia-{{ v.chave }}"{% if not loop.first %} hidden{% endif %}>
+          {% if v.modelo %}
+          {{ legenda([dict(modelo=v.modelo, classe=v.chave, papel=v.chave), dict(rotulo="P50 / P95", classe="dash")]) }}
+          {% else %}
+          {{ legenda([dict(modelo=modelo_base, classe="base", papel="base"), dict(modelo=modelo_nova, classe="nova", papel="nova")]) }}
+          {% endif %}
+          {{ grafico_barras(v.grafico, 240) }}
+        </div>
+        {% endfor %}
+      {% endcall %}
+
+      {% call chart_card("Tokens", "Volume total de entrada e saída por execução",
+                         [dict(modelo=modelo_base, classe="base", papel="base"), dict(modelo=modelo_nova, classe="nova", papel="nova"), dict(rotulo="Saída", classe="saida")], 4) %}
+        <div class="tokens">
+          {% for linha in tokens %}
+          <div class="tok-row">
+            <div class="tok-label"><i class="sw sw--{{ linha.serie }}"></i>{{ tag_modelo(linha.modelo, linha.serie ~ " · " ~ linha.modelo.prompt_versao) }}</div>
+            <div class="tok-bar">
+              <svg viewBox="0 0 100 10" preserveAspectRatio="none" class="tok-anim" style="--d: {{ 420 + loop.index0 * 80 }}ms">
+                {% for s in linha.segmentos %}
+                <rect class="tok tok--{{ linha.serie }} tok--{{ s.tipo }} hit-tok" x="{{ '%.3f' % s.x }}" y="0" width="{{ '%.3f' % ([s.largura, 0.4] | max) }}" height="10" vector-effect="non-scaling-stroke" tabindex="0" data-tip='{{ s.dica.model_dump() | tojson }}'/>
+                {% endfor %}
+              </svg>
+            </div>
+            <div class="tok-total">{{ linha.total_fmt }}</div>
+            <div class="tok-split">
+              {% for s in linha.segmentos %}<span>{{ "entrada" if s.tipo == "entrada" else "saída" }} {{ s.dica.linhas[loop.index0].valor }}</span>{% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+          <div class="tok-axis"><span>0</span><span>tokens</span></div>
+        </div>
+      {% endcall %}
+    </div>
+
+    <section class="card reveal" style="--s: 5">
+      <div class="card-head">
+        <div>
+          <h2>Regressões<span class="count">{{ regressoes | length }}</span></h2>
+          <p>Casos que a base acertava e a execução nova errou</p>
+        </div>
+      </div>
+      {% if regressoes %}
+        {{ tabela_mudancas(regressoes, "critico") }}
+      {% else %}
+        {{ estado_vazio("Nenhuma regressão",
+                        "Todos os casos que a base acertava continuam corretos na execução nova.", "ok", "ok") }}
+      {% endif %}
+    </section>
+
+    <section class="card reveal" style="--s: 6">
+      <div class="card-head">
+        <div>
+          <h2>Melhorias<span class="count">{{ melhorias | length }}</span></h2>
+          <p>Casos que a base errava e a execução nova acertou</p>
+        </div>
+      </div>
+      {% if melhorias %}
+        {{ tabela_mudancas(melhorias, "ok") }}
+      {% else %}
+        {{ estado_vazio("Nenhuma melhoria",
+                        "A execução nova não corrigiu nenhum caso que a base errava.") }}
+      {% endif %}
+    </section>
+
+    <details class="card reveal" style="--s: 7">
+      <summary>
+        <div>
+          <h2>Todos os casos<span class="count">{{ acertos_nova }}/{{ casos | length }}</span></h2>
+          <p>Detalhe da execução nova. Clique em uma linha para ver o resumo e a justificativa do juiz.</p>
+        </div>
+        <span class="chev">{{ icone("chevron-down", 18) }}</span>
+      </summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Caso</th><th>Mensagem</th><th>Esperada</th><th>Obtida</th><th>Resultado</th>
+                <th class="right">Nota</th><th class="right">Latência</th><th class="right">Custo (US$)</th><th aria-label="Expandir"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for c in casos %}
+              <tr class="row-toggle" tabindex="0" aria-expanded="false" aria-controls="det-{{ loop.index }}">
+                <td class="id">{{ c.id_caso }}</td>
+                <td class="msg"><q>{{ c.mensagem }}</q></td>
+                <td>{{ badge_categoria(c.esperada) }}</td>
+                <td>{{ badge_categoria(c.obtida, none if c.acertou else "critico") }}</td>
+                <td>
+                  {% if c.acertou %}<span class="res res--ok">{{ icone("ok", 13) }}acertou</span>
+                  {% else %}<span class="res res--erro">{{ icone("critico", 13) }}{{ "errou" if c.formato_valido else "formato" }}</span>{% endif %}
+                </td>
+                <td class="right nota">{% if c.nota is not none %}{{ c.nota }}<small>/5</small>{% else %}<span class="faint">—</span>{% endif %}</td>
+                <td class="right data nowrap">{{ c.latencia_fmt }}</td>
+                <td class="right data">{{ c.custo_fmt }}</td>
+                <td>{{ icone("chevron-right", 14) }}</td>
+              </tr>
+              <tr class="row-detail" id="det-{{ loop.index }}" hidden>
+                <td colspan="9">
+                  <dl>
+                    <dt>Resumo</dt><dd>{{ c.resumo if c.resumo else "—" }}</dd>
+                    <dt>Juiz</dt><dd>{{ c.justificativa if c.justificativa else "Sem avaliação do juiz nesta execução." }}</dd>
+                    {% if c.erro %}<dt>Erro</dt><dd class="err">{{ c.erro }}</dd>{% endif %}
+                  </dl>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <footer class="footer">
+    <dl>
+      <div><dt>Dataset</dt><dd>golden_{{ nova.dataset_versao }} · {{ dataset.casos | length }} casos<br>criado em {{ dataset.criado_em }}</dd></div>
+      <div><dt>Base</dt><dd>{{ tag_modelo(modelo_base, none, true) }}<br>prompt {{ base.prompt_versao }} · {{ base.executado_em }}</dd></div>
+      <div><dt>Nova</dt><dd>{{ tag_modelo(modelo_nova, none, true) }}<br>prompt {{ nova.prompt_versao }} · {{ nova.executado_em }}</dd></div>
+      <div>
+        <dt>Limiares</dt>
+        <dd>
+          aviso ≥ {{ limiares.queda_aviso_pp | fmt }} pp · crítico ≥ {{ limiares.queda_critico_pp | fmt }} pp<br>
+          queda da nota ≥ {{ limiares.queda_nota_resumo_aviso | fmt(2) }}<br>
+          categorias críticas: {{ limiares.categorias_criticas | join(", ") if limiares.categorias_criticas else "nenhuma" }}
+        </dd>
+      </div>
+    </dl>
+    <div class="gen">
+      <span>Latência P95 nova: {{ metricas_nova.latencia_p95 | fmt(0) }} ms{% if custo_juiz_fmt %} · custo do juiz: US$ {{ custo_juiz_fmt }}{% endif %}</span>
+      <span>Gerado em {{ gerado_em }}</span>
+    </div>
+  </footer>
+</main>
+
+<div class="tt" role="tooltip" aria-hidden="true"></div>
+
+<script>
+(function () {
+  "use strict";
+  var reduz = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  document.querySelectorAll("[data-count]").forEach(function (el) {
+    var alvo = parseFloat(el.dataset.count);
+    var casas = parseInt(el.dataset.decimals, 10) || 0;
+    var formato = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+    if (reduz || !isFinite(alvo)) { el.textContent = formato.format(alvo); return; }
+    var inicio = null, duracao = 600;
+    function passo(t) {
+      if (inicio === null) inicio = t;
+      var p = Math.min((t - inicio) / duracao, 1);
+      el.textContent = formato.format(alvo * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(passo);
+    }
+    el.textContent = formato.format(0);
+    setTimeout(function () { requestAnimationFrame(passo); }, 120);
+  });
+
+  var tt = document.querySelector(".tt");
+  var atual = null;
+  var SVG = "http://www.w3.org/2000/svg";
+  function logo(chave) {
+    var caixa = document.createElement("span");
+    caixa.className = "logo logo--sm logo--" + chave;
+    var svg = document.createElementNS(SVG, "svg");
+    var uso = document.createElementNS(SVG, "use");
+    uso.setAttribute("href", "#logo-" + chave);
+    svg.appendChild(uso);
+    caixa.appendChild(svg);
+    return caixa;
+  }
+  function preencher(dados) {
+    tt.textContent = "";
+    var titulo = document.createElement("div");
+    titulo.className = "tt-title";
+    titulo.textContent = dados.titulo;
+    tt.appendChild(titulo);
+    dados.linhas.forEach(function (l) {
+      var linha = document.createElement("div");
+      linha.className = "tt-row";
+      var sw = document.createElement("i");
+      sw.className = "sw sw--" + l.serie;
+      var rotulo = document.createElement("span");
+      rotulo.textContent = l.rotulo;
+      var valor = document.createElement("b");
+      valor.textContent = l.valor;
+      linha.append(sw);
+      if (l.provedor) linha.append(logo(l.provedor));
+      linha.append(rotulo, valor);
+      tt.appendChild(linha);
+    });
+  }
+  function posicionar(x, y) {
+    var w = tt.offsetWidth, h = tt.offsetHeight, m = 12;
+    var px = x + 14, py = y + 14;
+    if (px + w + m > window.innerWidth) px = x - w - 14;
+    if (py + h + m > window.innerHeight) py = y - h - 14;
+    tt.style.setProperty("--x", Math.max(m, px) + "px");
+    tt.style.setProperty("--y", Math.max(m, py) + "px");
+  }
+  function mostrar(el, x, y) {
+    if (atual !== el) {
+      try { preencher(JSON.parse(el.getAttribute("data-tip"))); } catch (e) { return; }
+      atual = el;
+    }
+    posicionar(x, y);
+    tt.classList.add("is-visible");
+  }
+  function esconder() { atual = null; tt.classList.remove("is-visible"); }
+
+  document.addEventListener("pointermove", function (ev) {
+    var el = ev.target.closest && ev.target.closest("[data-tip]");
+    if (el) mostrar(el, ev.clientX, ev.clientY); else if (atual) esconder();
+  });
+  document.addEventListener("focusin", function (ev) {
+    var el = ev.target.closest && ev.target.closest("[data-tip]");
+    if (!el) return;
+    var r = el.getBoundingClientRect();
+    mostrar(el, r.left + r.width / 2, r.top);
+  });
+  document.addEventListener("focusout", esconder);
+  window.addEventListener("scroll", esconder, { passive: true });
+
+  document.querySelectorAll("[role=tablist]").forEach(function (lista) {
+    var abas = Array.prototype.slice.call(lista.querySelectorAll("[role=tab]"));
+    function selecionar(aba) {
+      abas.forEach(function (outra) {
+        var ativa = outra === aba;
+        outra.setAttribute("aria-selected", String(ativa));
+        outra.tabIndex = ativa ? 0 : -1;
+        document.getElementById(outra.getAttribute("aria-controls")).hidden = !ativa;
+      });
+      esconder();
+    }
+    abas.forEach(function (aba, i) {
+      aba.addEventListener("click", function () { selecionar(aba); });
+      aba.addEventListener("keydown", function (ev) {
+        var passo = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+        if (!passo) return;
+        ev.preventDefault();
+        var proxima = abas[(i + passo + abas.length) % abas.length];
+        proxima.focus();
+        selecionar(proxima);
+      });
+    });
+  });
+
+  function alternar(linha) {
+    var detalhe = document.getElementById(linha.getAttribute("aria-controls"));
+    var aberta = linha.getAttribute("aria-expanded") === "true";
+    linha.setAttribute("aria-expanded", String(!aberta));
+    detalhe.hidden = aberta;
+  }
+  document.querySelectorAll(".row-toggle").forEach(function (linha) {
+    linha.addEventListener("click", function () { alternar(linha); });
+    linha.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); alternar(linha); }
+    });
+  });
+})();
+</script>
+</body>
+</html>
