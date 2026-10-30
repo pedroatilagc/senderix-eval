@@ -1,0 +1,15 @@
+.env
+.env.*
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git/
+.github/
+.vscode/
+.idea/
+relatorios/
+resultados_simulados/
+saida_ci/
+Dockerfile
+.dockerignore

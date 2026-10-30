@@ -1,0 +1,164 @@
+name: Senderix Eval
+
+on:
+  # Sem filtro de caminhos: o workflow roda em todo PR (para o check obrigatório sempre reportar)
+  # e o passo "Detectar mudanças relevantes" decide se o eval precisa rodar.
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: senderix-eval-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  eval:
+    name: Senderix Eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Verificar acesso aos secrets
+        id: origem
+        env:
+          EVENTO: ${{ github.event_name }}
+          REPO_PR: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ "$EVENTO" = "pull_request" ] && [ "$REPO_PR" != "$REPO" ]; then
+            motivo="PR vindo de fork ($REPO_PR): o GitHub não repassa secrets para forks, então o eval (que chama a API) não roda aqui. Para avaliar, um mantenedor deve levar a branch para este repositório e rodar o workflow pela aba Actions."
+            echo "::notice title=Eval pulado::$motivo"
+            { echo "### ⏭️ Senderix Eval pulado"; echo; echo "$motivo"; } >> "$GITHUB_STEP_SUMMARY"
+            echo "pular=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pular=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.origem.outputs.pular != 'true'
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # histórico completo para o git diff entre a base e a cabeça do PR
+
+      - name: Detectar mudanças relevantes
+        id: mudancas
+        if: steps.origem.outputs.pular != 'true'
+        env:
+          EVENTO: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          CABECA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENTO" != "pull_request" ]; then
+            echo "Execução manual: o eval roda sempre."
+            echo "rodar=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Atribuição separada: se o git diff falhar, o passo falha (em vez de dispensar o eval em silêncio).
+          alterados=$(git diff --name-only "$BASE...$CABECA")
+          relevantes=()
+          while IFS= read -r arquivo; do
+            case "$arquivo" in
+              prompts/* | dataset/* | baseline/* | templates/* | \
+              config_producao.yaml | limiares.yaml | requirements.txt | .github/workflows/eval.yml)
+                relevantes+=("$arquivo") ;;
+              */*) ;; # .py em subpastas não fazem parte do eval
+              *.py) relevantes+=("$arquivo") ;;
+            esac
+          done <<< "$alterados"
+
+          if [ ${#relevantes[@]} -eq 0 ]; then
+            motivo="Nenhum arquivo do eval mudou neste PR (prompts, dataset, baseline, configuração, limiares, código ou dependências). O eval não foi executado."
+            echo "::notice title=Eval dispensado::$motivo"
+            { echo "### ⏭️ Senderix Eval dispensado"; echo; echo "$motivo"; } >> "$GITHUB_STEP_SUMMARY"
+            echo "rodar=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Arquivos relevantes alterados:"
+            printf '  %s\n' "${relevantes[@]}"
+            echo "rodar=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup do Python
+        if: steps.mudancas.outputs.rodar == 'true'
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        if: steps.mudancas.outputs.rodar == 'true'
+        run: pip install -r requirements.txt
+
+      - name: Rodar eval
+        id: eval
+        if: steps.mudancas.outputs.rodar == 'true'
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set +e
+          python eval_ci.py --alertar
+          codigo=$?
+          echo "codigo=$codigo" >> "$GITHUB_OUTPUT"
+          if [ -f saida_ci/resumo.md ]; then
+            cat saida_ci/resumo.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Publicar artefatos
+        if: ${{ !cancelled() && steps.mudancas.outputs.rodar == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: senderix-eval-${{ github.run_number }}-${{ github.run_attempt }}
+          path: saida_ci/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Comentar no PR
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && steps.mudancas.outputs.rodar == 'true' }}
+        continue-on-error: true
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const marcador = '<!-- senderix-eval -->';
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const urlExecucao = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const commit = context.payload.pull_request.head.sha.slice(0, 7);
+
+            let resumo;
+            try {
+              resumo = fs.readFileSync('saida_ci/resumo.md', 'utf8');
+            } catch {
+              resumo = '## ❌ Senderix Eval: não foi possível concluir\n\nO eval falhou antes de gerar o resumo. Veja o log da execução.\n';
+            }
+            const corpo = `${marcador}\n${resumo}\n---\n🔗 [Execução do workflow (log e artefatos)](${urlExecucao}) · commit \`${commit}\``;
+
+            const comentarios = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const anterior = comentarios.find(
+              (c) => c.user?.type === 'Bot' && c.body?.includes(marcador),
+            );
+            if (anterior) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: anterior.id, body: corpo });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body: corpo });
+            }
+
+      - name: Aplicar veredito
+        if: steps.mudancas.outputs.rodar == 'true'
+        env:
+          CODIGO: ${{ steps.eval.outputs.codigo }}
+        run: |
+          case "$CODIGO" in
+            0) echo "Eval concluído sem regressão crítica." ;;
+            1) echo "::error title=Senderix Eval::Uso incorreto (configuração ou baseline). Veja o resumo."; exit 1 ;;
+            2) echo "::error title=Senderix Eval::Regressão CRÍTICA em relação à baseline."; exit 1 ;;
+            *) echo "::error title=Senderix Eval::Erro de execução/infraestrutura (código ${CODIGO:-desconhecido})."; exit 1 ;;
+          esac

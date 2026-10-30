@@ -4,3 +4,4 @@ venv/
 __pycache__/
 resultados_simulados/
 relatorios/
+saida_ci/

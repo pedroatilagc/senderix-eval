@@ -16,6 +16,13 @@ class PromptConfig(BaseModel):
     modelo: str = "openai/gpt-40-mini"
     temperatura: float = Field(default=0, ge=0, le=2)
 
+class ConfigProducao(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: str
+    modelo: str
+    dataset: str
+
 class CasoTeste(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
