@@ -2,14 +2,20 @@
 
 **CI de qualidade para o classificador com LLM do [Senderix](https://senderix.com.br).** A cada mudança de prompt ou de modelo, este repositório aplica um golden dataset ao classificador, pontua o resultado em cinco dimensões (acerto de categoria, conformidade de formato, qualidade do resumo, latência e custo), compara com a versão aprovada em produção e, se a qualidade cair além dos limiares, **bloqueia o merge**, comenta no PR e alerta o time no Discord. O objetivo é simples: nenhuma mudança no comportamento da IA chega aos clientes sem ter sido medida.
 
-**🎥 [Assista à demonstração em vídeo](https://www.loom.com/share/8e5df4a4c1db41e3b8eb7166d3958a82)**: um PR trocando o modelo de produção é avaliado, recebe veredito crítico e tem o merge bloqueado automaticamente.
+[![Assistir vídeo completo](https://img.shields.io/badge/Assistir_vídeo_completo-625DF5?style=for-the-badge&logo=loom&logoColor=white)](https://www.loom.com/share/8e5df4a4c1db41e3b8eb7166d3958a82)
 
-[![Demonstração do Senderix Eval](https://cdn.loom.com/sessions/thumbnails/8e5df4a4c1db41e3b8eb7166d3958a82-with-play.gif)](https://www.loom.com/share/8e5df4a4c1db41e3b8eb7166d3958a82)
+<div>
+    <a href="https://www.loom.com/share/8e5df4a4c1db41e3b8eb7166d3958a82">
+      <p>Senderix Eval: CI que bloqueia regressões de LLM antes da produção - Watch Video</p>
+    </a>
+    <a href="https://www.loom.com/share/8e5df4a4c1db41e3b8eb7166d3958a82">
+      <img style="max-width:300px;" src="https://www.loom.com/v1/videos/8e5df4a4c1db41e3b8eb7166d3958a82/thumbnail.gif">
+    </a>
+  </div>
 
 > Este documento é o ponto de partida para quem entra no time. Ele explica o que o sistema faz, por que foi construído assim e como operá-lo no dia a dia.
 
 ---
-
 ## Sumário
 
 1. [Contexto: onde este eval se encaixa no Senderix](#1-contexto-onde-este-eval-se-encaixa-no-senderix)
